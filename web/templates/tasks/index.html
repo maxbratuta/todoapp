@@ -1,0 +1,10 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+  <h2>Task List</h2>
+  <ul>
+  {% for task in task_list %}
+    <li>{{ task.name }} - {{ task.description }}</li>
+  {% endfor %}
+  </ul>
+{% endblock %}
