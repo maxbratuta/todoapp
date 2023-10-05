@@ -1,27 +1,69 @@
 {% extends 'todo/index.html' %}
 
 {% block content %}
-<div class="content-section">
-    <form action="" method="POST">
-        {% csrf_token %}
-        <fieldset class="form-group">
-            <legend>Login</legend>
-            <hr>
-            {{ form }}
-        </fieldset>
+    <div class="container pt-5">
+        <h1 class="h3 mb-3 fw-normal text-center">Login</h1>
 
-        <div class="form-submit">
-            <button class="login-submit-btn" type="submit">Login</button>
-        </div>
+        <form
+                action=""
+                method="POST"
+                class="m-auto p-3"
+                style="max-width: 320px;"
+        >
+            {% csrf_token %}
 
-        <hr>
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
 
-        <div id="create-account">
-            <medium class="text-muted">
-                Don't Have an Account?
-                <a href="{% url 'register' %}" class="register-link">Sign Up</a>
-            </medium>
-        </div>
-    </form>
-</div>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                <input
+                        type="text"
+                        class="form-control"
+                        name="{{ form.username.name }}"
+                        id="{{ form.username.id_for_label }}"
+                        placeholder="Enter Username"
+                        required
+                />
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                <input
+                        type="password"
+                        class="form-control"
+                        name="{{ form.password.name }}"
+                        id="{{ form.password.id_for_label }}"
+                        placeholder="Enter Password"
+                        required
+                />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Login</button>
+
+            <hr class="mt-4 mb-0"/>
+
+            <div class="navbar">
+                <span class="navbar-text text-secondary">Don't Have an Account?</span>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" href="{% url 'register' %}">Sign up</a>
+                    </li>
+                </ul>
+            </div>
+        </form>
+    </div>
 {% endblock %}

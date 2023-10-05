@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator
+from django.db.models import F
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -13,17 +14,19 @@ def register(request):
     Args:
         request (POST): New user registered
     """
-    form = UserRegistrationForm()
     if request.method == "POST":
         form = UserRegistrationForm(request.POST)
+
         if form.is_valid():
             form.save()
+
             return redirect("login")
     else:
         form = UserRegistrationForm()
 
-    context = {"form": form}
-    return render(request, "todo/register.html", context)
+    return render(request, "todo/register.html", {
+        "form": form
+    })
 
 
 @login_required
@@ -33,12 +36,12 @@ def home(request):
     """
     if request.method == 'POST':
         todo_name = request.POST.get("new-todo")
-        todo = TodoItem.objects.create(name=todo_name, user=request.user)
+
+        TodoItem.objects.create(name=todo_name, user=request.user)
+
         return redirect("home")
 
-    # retrieving todo items which are incomplete
-    # todos = TodoItem.objects.filter(user=request.user, is_completed=False).order_by("-id")
-    todos = TodoItem.objects.filter(user=request.user).order_by("-id")
+    todos = TodoItem.objects.filter(user=request.user).order_by("is_completed", "-id")
 
     return render(request, "todo/crud.html", context={
         "todos": todos,
@@ -46,6 +49,7 @@ def home(request):
     })
 
 
+@login_required
 def update_todo(request, pk):
     """
     Update todo item
@@ -57,11 +61,14 @@ def update_todo(request, pk):
 
     # NOTE: request.POST.get("todo_{pk}") is the input name of the todo modal
     todo.name = request.POST.get(f"todo_{pk}")
+
     todo.save()
+
     # return redirect("home")
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
+@login_required
 def delete_todo(request, pk):
     """
     Delete todo item
@@ -69,17 +76,23 @@ def delete_todo(request, pk):
         pk (Integer): Todo ID - Primary key
     """
     todo = get_object_or_404(TodoItem, id=pk, user=request.user)
+
     todo.delete()
+
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-def complete_todo(request, pk):
+@login_required
+def toggle_todo_status(request, pk):
     """
     Updating todo as completed item
     Args:
         pk (Integer): Todo ID - primary key
     """
     todo = get_object_or_404(TodoItem, id=pk, user=request.user)
-    todo.is_completed = True
+
+    todo.is_completed = not todo.is_completed
+
     todo.save()
+
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
